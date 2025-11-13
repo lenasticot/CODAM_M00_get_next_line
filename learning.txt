@@ -1,0 +1,23 @@
+Get_next_line
+
+Notions importantes a regarder en detail
+	read()
+	Static variable
+	open()
+	linked list
+
+
+	Read = va essayer de lire nbytes dans l'objet fildes dans le buffer pointe par *buf
+	la fonction renvoie 0 quand elle est arrive au bout du fichier. 
+	Lorsqu'elle est rappelle, elle va se positionner a l'endroit ou elle s'etait arrete 
+	en fonction de nbytes demandes
+
+	Static Variables
+
+	Static variable = a static variable is declared using satic keyword and have the property
+	of retaining their value between multiple function calls. It is initialized only once and is 
+	not destroyed when the function returns a value. It extends the lfetime of the variable till
+	the end of the program
+	Unitialized Static variables have 0 value. 
+	Static local variable are initialized only once and stay htroughouh the program's life 
+	Static Global wariables have internal linkage
