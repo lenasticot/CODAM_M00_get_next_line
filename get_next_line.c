@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: leodum <leodum@student.42.fr>              +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 12:14:47 by leodum            #+#    #+#             */
-/*   Updated: 2025/11/13 19:29:00 by leodum           ###   ########.fr       */
+/*   Updated: 2025/11/18 15:30:33 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,6 @@
 #include <stdlib.h>
 
 
-// useful function from libft
-	//ft_strchr
-	//ft_strdup
-	//ft_strlen
-	//ft_substr
-	//fr_strjoin
 
 // other interesting fctions
 	// char *get_next_line(int fd)
@@ -58,6 +52,40 @@
 	// are static variable really that hard? 
 
 
+
+	// REMAINING ISSUES
+		// Malloc allocation
+		// check if the text is empty
+		// check if there is nothing to copy anymore
+size_t	ft_strlen(const char *s)
+{
+	size_t	i;
+
+	i = 0;
+	while (s[i])
+		i++;
+	return (i);
+}
+
+	
+char	*ft_strdup(const char *s)
+{
+	char	*result;
+	int		i;
+
+	i = 0;
+	result = malloc(sizeof(char) * ft_strlen(s) + 1);
+	if (result == NULL)
+		return (NULL);
+	while (s[i])
+	{
+		result[i] = s[i];
+		i++;
+	}
+	result[i] = '\0';
+	return (result);
+}
+
 char	*ft_strchr(const char *s, int c)
 {
 	unsigned char	uc;
@@ -79,61 +107,71 @@ char	*ft_strchr(const char *s, int c)
 
 char	*get_next_line(int fd)
 {
-
-
-	//1st step
-	// how to read a file?
-	// DONNNNNEEEEE
-	
+ 
 	int i;
 	int j;
-char *result= malloc(sizeof(char) *50);;
-char *temp = malloc(sizeof(char) *50);
+	int k;
+	int len;
+	int size;
+	static int check = 0;
+	static char *buf;
+	char *result = malloc(sizeof(char) *50);
+	char *temp = malloc(sizeof(char) *50);
 
 	i = 0;
 	j = 0;
+	k = 0;
+	len = 5;
+
+	if (fd < 0)
+		return (NULL);
+
+		if(check == 1)
+		{ 
+			while(buf[j] != '\n')
+			j++;
+		j++;
+			while(buf[j] != '\0')
+				result[i++] = buf[j++];
+		}
+		
 	while(result[i] != '\n')
 	{ 
-	// need to malloc that shit
-	read(fd, temp, 5);
-	temp[6] = '\0';
+	// need special allocation of the length
+	temp[len + 1] = '\0';
+	read(fd, temp, len);
 	j = 0;
-	// size also to be check here
-		// the index need to be return at the beginning of the part that has been exported
-		// like based on the size of read
-
 			if(!ft_strchr((const char *)temp, '\n'))
 			{ 
-
-				while(j < 5)
+				while(j < len)
 				result[i++] = temp[j++];
+				check = 0;
 			}
 			else
 			{
-
+				buf = malloc((sizeof(char) * ft_strlen(temp)) + 1);
+				buf = ft_strdup(temp);
+				buf[len + 1] = '\0';
 				while(temp[j] != '\n') 
 				{ 
 				result[i++] = temp[j++];
 				}
 				result[i] = '\n';
+				check = 1;
+				break ;
 			}
-				// in this else statement, i need to
-				// add the return char
-				// then check my string within temp
-				// i also should copy until the \n and not just stop
-				// so first copy
-				// add the \na
-	
-
 	}
 		printf("%s", result);
-	
 }
 
 
 int main(void)
 {
 	int fd = open("test.txt", O_RDWR);
+	*get_next_line(fd);
+	*get_next_line(fd);
+	*get_next_line(fd);
+	*get_next_line(fd);
 	*get_next_line(fd);
 	
 }
