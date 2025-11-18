@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 12:14:47 by leodum            #+#    #+#             */
-/*   Updated: 2025/11/18 15:30:33 by marvin           ###   ########.fr       */
+/*   Updated: 2025/11/18 20:55:06 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,6 +126,9 @@ char	*get_next_line(int fd)
 	if (fd < 0)
 		return (NULL);
 
+		// probably have to check the buf some edge cases more
+		// like if there is 2 '\n' within the buf what do i do
+		// also it just overwrite it each time, is that ok? to be sure
 		if(check == 1)
 		{ 
 			while(buf[j] != '\n')
@@ -149,7 +152,6 @@ char	*get_next_line(int fd)
 			}
 			else
 			{
-				buf = malloc((sizeof(char) * ft_strlen(temp)) + 1);
 				buf = ft_strdup(temp);
 				buf[len + 1] = '\0';
 				while(temp[j] != '\n') 
