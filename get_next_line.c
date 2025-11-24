@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 12:14:47 by leodum            #+#    #+#             */
-/*   Updated: 2025/11/18 20:55:06 by marvin           ###   ########.fr       */
+/*   Updated: 2025/11/23 19:17:43 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <stdio.h> 
 #include <stdlib.h>
+#include <stdint.h>
 
 
 
@@ -23,40 +24,15 @@
 	// char *_set_line(char *line_buffer)
 
 
-		// Write a function that returns a line read from a file descriptor
-	// the function should return the line that was read. If there is nothing
-	// left to read or if an error occurs, it should return NULL
-
-	// Make sure your function works as expected both when reading a file
-	// and when reading from the standard input
-
-	// the returned line should include the terminating \n character,
-	// except when the end of the file is reached and the file does not
-	// end with a \n character
-
-	// Ideas
-	
-	// Receive the fd
-	// open and check what is inside
-	// if empty, return null 
-	// if fill, read until you reach the end of the line
-	// when reaching the end of the line return the full line
-	
-	// difficulties ?
-	
-	// need to store the received read text and store it; using malloc in a while loop
-	// allocating memory based on x number of char provide
-	//  static variables ??
-	// maybe need to create my own open because it does not looks like its available rn
-	// cannot use global variable/ maybe thats the trick? 
-	// are static variable really that hard? 
-
 
 
 	// REMAINING ISSUES
 		// Malloc allocation
 		// check if the text is empty
 		// check if there is nothing to copy anymore
+
+		
+		
 size_t	ft_strlen(const char *s)
 {
 	size_t	i;
@@ -86,6 +62,30 @@ char	*ft_strdup(const char *s)
 	return (result);
 }
 
+char	*ft_substr(char const *s, unsigned int start, size_t len)
+{
+	char			*substring;
+	size_t			i;
+
+	i = 0;
+	if (*s == '\0')
+		return (ft_strdup(""));
+	if (start > ft_strlen(s))
+		return (ft_strdup(""));
+	if (len > ft_strlen(s + start))
+		len = ft_strlen(s + start);
+	substring = malloc((sizeof (char) * len) + 1);
+	if (substring == NULL)
+		return (NULL);
+	while (i < len)
+	{
+		substring[i] = s[start + i];
+		i++;
+	}
+	substring[i] = '\0';
+	return (substring);
+}
+
 char	*ft_strchr(const char *s, int c)
 {
 	unsigned char	uc;
@@ -105,6 +105,24 @@ char	*ft_strchr(const char *s, int c)
 	return (NULL);
 }
 
+void	*ft_calloc(size_t count, size_t size)
+{
+	unsigned char	*ptr;
+	size_t			i;
+	size_t			len;
+
+	i = 0;
+	if (size != 0 && count > SIZE_MAX / size)
+		return (NULL);
+	len = count * size;
+	ptr = malloc(len);
+	if (ptr == NULL)
+		return (NULL);
+	while (i < len)
+		ptr[i++] = 0;
+	return (ptr);
+}
+
 char	*get_next_line(int fd)
 {
  
@@ -115,8 +133,8 @@ char	*get_next_line(int fd)
 	int size;
 	static int check = 0;
 	static char *buf;
-	char *result = malloc(sizeof(char) *50);
-	char *temp = malloc(sizeof(char) *50);
+	char *result = ft_calloc(50, sizeof(char) * 50);
+	char *temp = ft_calloc(50, sizeof(char) *50);
 
 	i = 0;
 	j = 0;
@@ -125,23 +143,26 @@ char	*get_next_line(int fd)
 
 	if (fd < 0)
 		return (NULL);
-
-		// probably have to check the buf some edge cases more
-		// like if there is 2 '\n' within the buf what do i do
-		// also it just overwrite it each time, is that ok? to be sure
-		if(check == 1)
+			
+	if(check == 1)
 		{ 
-			while(buf[j] != '\n')
-			j++;
-		j++;
-			while(buf[j] != '\0')
+			while((buf[j] != '\0') && (buf[j] != '\n'))
 				result[i++] = buf[j++];
+			if(buf[j] == '\n' && buf[j +1] != '\0')
+			{ 
+				j++;
+				buf = ft_substr(buf, (j +1), ft_strlen(buf));
+			}
+			else
+			{ 
+				check = 0;
+				printf("%s", result);
+				return ;
+			}
 		}
-		
-	while(result[i] != '\n')
+	
+	while(i < 1000)
 	{ 
-	// need special allocation of the length
-	temp[len + 1] = '\0';
 	read(fd, temp, len);
 	j = 0;
 			if(!ft_strchr((const char *)temp, '\n'))
@@ -151,14 +172,15 @@ char	*get_next_line(int fd)
 				check = 0;
 			}
 			else
-			{
-				buf = ft_strdup(temp);
-				buf[len + 1] = '\0';
+			{ 
 				while(temp[j] != '\n') 
-				{ 
-				result[i++] = temp[j++];
-				}
+					result[i++] = temp[j++];
+				j++;
 				result[i] = '\n';
+				buf = calloc(len +1, sizeof(char) * len);
+				while(temp[j] != '\0')
+					buf[k++] = temp[j++];
+				buf[k] = '\0';
 				check = 1;
 				break ;
 			}
@@ -170,6 +192,9 @@ char	*get_next_line(int fd)
 int main(void)
 {
 	int fd = open("test.txt", O_RDWR);
+	*get_next_line(fd);
+	*get_next_line(fd);
+	*get_next_line(fd);
 	*get_next_line(fd);
 	*get_next_line(fd);
 	*get_next_line(fd);

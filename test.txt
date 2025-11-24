@@ -1,3 +1,9 @@
 helloz
-is it working??
-thats crazy as fuckz
+is
+it working??
+thats crazy as fuc
+I 
+Need
+To check what happen if there 
+is 2 \n within one sentence
+also manage to have a stop rather than segfault
