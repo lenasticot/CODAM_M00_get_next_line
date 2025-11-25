@@ -6,7 +6,7 @@
 /*   By: leodum <leodum@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 12:17:39 by leodum            #+#    #+#             */
-/*   Updated: 2025/11/24 15:25:08 by leodum           ###   ########.fr       */
+/*   Updated: 2025/11/25 19:40:52 by leodum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,30 @@ size_t	ft_strlen(const char *s)
 	while (s[i])
 		i++;
 	return (i);
+}
+
+char	*ft_strjoin(char const *s1, char const *s2)
+{
+	int		len;
+	int		i;
+	int		j;
+	char	*result;
+
+	i = 0;
+	j = 0;
+	len = 0;
+	len = ft_strlen(s1);
+	len += ft_strlen(s2);
+	result = malloc((sizeof (char) * len) + 1);
+	if (result == NULL)
+		return (NULL);
+	while (s1[i])
+		result[j++] = s1[i++];
+	i = 0;
+	while (s2[i])
+		result[j++] = s2[i++];
+	result[j] = '\0';
+	return (result);
 }
 
 char	*ft_strdup(const char *s)

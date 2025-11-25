@@ -1,5 +1,8 @@
 h
 i
+wh
+the 
+hell
 it working??
 thats crazy as fuc
 I 
@@ -7,5 +10,3 @@ Need
 To check what happen if there 
 is 2 \n within one sentence
 also manage to have a stop rather than segfault
-
-interesting ref to check: https://medium.com/@lannur-s/42-get-next-line-guide-string-approach-chapter-2-mallocs-and-frees-of-course-with-valgrind-e7ccbf31526c
