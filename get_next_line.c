@@ -6,7 +6,7 @@
 /*   By: leodum <leodum@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 12:14:47 by leodum            #+#    #+#             */
-/*   Updated: 2025/11/25 20:39:20 by leodum           ###   ########.fr       */
+/*   Updated: 2025/11/26 16:26:41 by leodum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,9 +43,6 @@
 
 char	*get_next_line(int fd)
 {
-	int i;
-	int j;
-	int k;
 	int char_left;
 	int index;
 	static int check = 0;
@@ -57,65 +54,55 @@ char	*get_next_line(int fd)
 	char *temp_buf;
 	
 	char_left = 1;
-	i = 0;
-	j = 0;
-	k = 0;
-	// Result size: You allocate BUFFER_SIZE + 1 for result, 
-	// but lines can be longer than BUFFER_SIZE, right? You keep appending in a loop. Will you overflow?
+	index = 0;
 	result = ft_calloc(BUFFER_SIZE +1, sizeof(char));
 	
 	if (fd < 0)
 		return (NULL);	
 	if(check == 1)
 		{ 
-			// need to rework all of that with the strjoin logic
-			// about to kill myself
 			temp_buf = ft_strchr((const char *)buf, '\n');
 			if(temp_buf != NULL)
 			{
 				index = temp_buf - buf;
 				old_buf = buf;
 				buf = ft_substr(buf, 0, index +1);
+				old_result = result;
 				result = ft_strjoin(result, buf);
+				free (buf);
 				buf = ft_substr(old_buf, index +1, ft_strlen(old_buf) - index - 1);
+				free (old_result);
+				free (old_buf);
+				return (result);
 			}
-			
-			// while((buf[j] != '\0') && (buf[j] != '\n'))
-			// 	result[i++] = buf[j++];
-			// if(buf[j] == '\n')  
-			// {
-			// 	if(buf[j +1] != '\0')
-			// 	{ 
-			// 		// What if buf[j] is '\n' but buf[j+1] IS '\0'? 
-			// 		// You fall through to the read loop. Is that right? Shouldn't you return the line with the \n?
-			// 		old_buf = buf;
-			// 		buf = ft_substr(buf, j +1, ft_strlen(buf));
-			// 		free (old_buf);
-			// 		result[i] = '\n';
-			// 		return(result);
-			// 	}	
-			// 	else
-			// 	{
-			// 		free (buf);
-			// 		result[i] = '\n';
-			// 		return (result);
-			// 	}
-			// }
+			else
+			{
+				old_result = result;
+				result = ft_strjoin(result, buf);
+				check == 0;
+				free (old_result);
+				free (buf);
+			}
+			index = 0;
 		}
 	// what should be this condition?
-	while(char_left != 0)
+	while(check == 0)
 	{ 
 		temp = ft_calloc(BUFFER_SIZE +1, sizeof(char));
 		char_left = read(fd, temp, BUFFER_SIZE);
 		if (char_left <= 0)
 		{
-			// What if the file ends with "Hello" (no final \n)? 
-			// You have data in result but you're returning NULL! Should you check if result has content first?
+			if (buf != NULL)
+			{
+				old_result = result;
+				result = ft_strjoin(result, buf);
+				free (old_result);
+			}
 			free (buf); 
-			return(NULL);
+			return(result);
 		}
-		j = 0;
-		if(!ft_strchr((const char *)temp, '\n'))
+		temp_buf = ft_strchr((const char *)temp, '\n');
+		if(temp_buf == NULL)
 		{ 
 			old_result = result;
 			result = ft_strjoin(result, temp);
@@ -124,17 +111,16 @@ char	*get_next_line(int fd)
 		}
 		else
 		{ 
-			while(temp[j] != '\n') 
-				result[i++] = temp[j++];
-			result[i] = '\n';
-			buf = calloc(BUFFER_SIZE +1, sizeof(char));
-			while(temp[j] != '\0')
-				buf[k++] = temp[++j];
-			buf[k] = '\0';
+			index = temp_buf - temp;
+			temp = ft_substr(temp, 0, index +1);
+			old_result = result;
+			result = ft_strjoin(result, temp);
+			buf = ft_substr(temp_buf, 1, ft_strlen(temp_buf));
 			check = 1;
-			break ;
+			free (temp);
+			free (old_result);
+			return (result);
 		}
-		free (temp);
 	}
 	return (result);
 }
@@ -154,6 +140,8 @@ int main(void)
 	char *k = get_next_line(fd);
 	char *l = get_next_line(fd);
 	char *m = get_next_line(fd);
+	char *n = get_next_line(fd);
+	char *o = get_next_line(fd);
 	
 	printf("%s", a);
 	printf("%s", b);
@@ -166,4 +154,6 @@ int main(void)
 	printf("%s", k);
 	printf("%s", l);
 	printf("%s", m);
+	printf("%s", n);
+	printf("%s", o);
 }
