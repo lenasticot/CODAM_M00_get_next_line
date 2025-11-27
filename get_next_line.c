@@ -6,7 +6,7 @@
 /*   By: leodum <leodum@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 12:14:47 by leodum            #+#    #+#             */
-/*   Updated: 2025/11/26 16:26:41 by leodum           ###   ########.fr       */
+/*   Updated: 2025/11/27 22:42:03 by leodum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,113 +18,93 @@
 #include "get_next_line.h"
 
 
+char *extract_line_from_buffer(char **buf_ptr)
+{
+	char *result;
+	char *afternewline;
+	int index;
+	
+	if (*buf_ptr == NULL)
+		return (NULL);
+		// ok problem here because if i put the pointer to buf_ptr to afternewline
+		// so when i free buf_ptr, i also free afternewline
+		// need to copy and not just put the pointer
+		// need to think about it
+		// maybe modify ft_strchr directly ?
+	afternewline = ft_strchr(*buf_ptr, '\n');
+	if (afternewline == NULL)
+		return (NULL);
+	index = afternewline - *buf_ptr + 1;
+	result = ft_substr(*buf_ptr, 0, index);
+	free (*buf_ptr);
+	if (*(afternewline + 1) == '\0')
+		*buf_ptr = NULL;
+	else
+	*buf_ptr = ft_strdup(afternewline + 1);
+	return (result);
+}
+// need to work on the length also 
+// gonna be complicated
+// maybe add a function free them all ?
+int process_temp_buffer(char *temp, char **result_ptr, char **buf_ptr)
+{
+	char *buf_char;
+	char *old_result;
+	char *newline;
+	int index;
+	
+	buf_char = ft_strchr(temp, '\n');
+	if (buf_char != NULL)
+	{
+		index = buf_char - temp +1;
+		old_result = *result_ptr;
+		// maybe add a check if NULL?
+		newline = ft_substr(temp, 0, index);
+		*result_ptr = ft_strjoin(old_result, newline);
+		free (old_result);
+		free (newline);
+		if (*(buf_char + 1) == '\0')
+			*buf_ptr = NULL;
+		else
+			*buf_ptr = ft_strdup(buf_char +1); 
+		return (1);
+	}
+	else
+	{ 
+		old_result = *result_ptr;
+		*result_ptr = ft_strjoin(old_result, temp);
+		free (old_result);
+	}
+	return (0);
+}
 
-// other interesting fctions
-	// char *get_next_line(int fd)
-	// char	*_fill_line_buffer(int fd, char *left_c, char *buffer)
-	// char *_set_line(char *line_buffer)
-
-// EDGE CASES TO TEST:
-
-// File with no final \n
-// Empty file
-// BUFFER_SIZE = 1
-// Line longer than BUFFER_SIZE
-// File that's exactly BUFFER_SIZE bytes
-
-// Questions for you:
-
-// When should check be reset to 0?
-// What happens to buf after you've processed all its content?
-// Should result be dynamically resized as you read?
-
-// Want to tackle these before refactoring? Which one jumps out as most urgent?
-
-
+// one remaining problem
+// to check when there is no newline case
 char	*get_next_line(int fd)
 {
 	int char_left;
-	int index;
+	int found;
 	static int check = 0;
 	static char *buf;
 	char *result;
 	char *temp;
-	char *old_buf;
-	char *old_result;
-	char *temp_buf;
-	
-	char_left = 1;
-	index = 0;
+
+	result = extract_line_from_buffer(&buf);
+	if (result != NULL)
+		return (result);
+
 	result = ft_calloc(BUFFER_SIZE +1, sizeof(char));
-	
-	if (fd < 0)
-		return (NULL);	
-	if(check == 1)
-		{ 
-			temp_buf = ft_strchr((const char *)buf, '\n');
-			if(temp_buf != NULL)
-			{
-				index = temp_buf - buf;
-				old_buf = buf;
-				buf = ft_substr(buf, 0, index +1);
-				old_result = result;
-				result = ft_strjoin(result, buf);
-				free (buf);
-				buf = ft_substr(old_buf, index +1, ft_strlen(old_buf) - index - 1);
-				free (old_result);
-				free (old_buf);
-				return (result);
-			}
-			else
-			{
-				old_result = result;
-				result = ft_strjoin(result, buf);
-				check == 0;
-				free (old_result);
-				free (buf);
-			}
-			index = 0;
-		}
-	// what should be this condition?
-	while(check == 0)
-	{ 
-		temp = ft_calloc(BUFFER_SIZE +1, sizeof(char));
+	temp = ft_calloc(BUFFER_SIZE +1, sizeof(char));
+	while (!found)
+	{
 		char_left = read(fd, temp, BUFFER_SIZE);
-		if (char_left <= 0)
-		{
-			if (buf != NULL)
-			{
-				old_result = result;
-				result = ft_strjoin(result, buf);
-				free (old_result);
-			}
-			free (buf); 
-			return(result);
-		}
-		temp_buf = ft_strchr((const char *)temp, '\n');
-		if(temp_buf == NULL)
-		{ 
-			old_result = result;
-			result = ft_strjoin(result, temp);
-			check = 0;
-			free (old_result);
-		}
-		else
-		{ 
-			index = temp_buf - temp;
-			temp = ft_substr(temp, 0, index +1);
-			old_result = result;
-			result = ft_strjoin(result, temp);
-			buf = ft_substr(temp_buf, 1, ft_strlen(temp_buf));
-			check = 1;
-			free (temp);
-			free (old_result);
-			return (result);
-		}
+		found = process_temp_buffer(temp, &result, &buf);
+		if(found)
+			break ; 
 	}
+	
 	return (result);
 }
-
 
 int main(void)
 {

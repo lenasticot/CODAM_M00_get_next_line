@@ -10,3 +10,39 @@ Need
 To check what happen if there 
 is 2 \n within one sentence
 also manage to have a stop rather than segfault
+
+EDGE CASES TO TEST:
+
+File with no final \n
+Empty file
+BUFFER_SIZE = 1
+Line longer than BUFFER_SIZE
+File that's exactly BUFFER_SIZE bytes
+
+Questions for you:
+
+When should check be reset to 0?
+What happens to buf after you've processed all its content?
+Should result be dynamically resized as you read?
+
+
+Possible helper functions:
+
+"Read from static buffer if it has data"
+"Read from file and append to result until you hit newline"
+"Extract line from a string (up to and including \n)"
+"Save leftover data after \n to static buffer"
+
+Key question as you design them:
+For each helper, ask yourself:
+
+What does it receive? (pointers? values?)
+What does it return? (allocated string? position? boolean?)
+What does it allocate? (who frees it?)
+Does it modify static variables?
+
+A suggestion:
+Before writing code, sketch out:
+
+Function signatures (name, parameters, return type)
+Which function is responsible for freeing what
