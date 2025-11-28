@@ -6,7 +6,7 @@
 /*   By: leodum <leodum@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 12:14:47 by leodum            #+#    #+#             */
-/*   Updated: 2025/11/27 22:42:03 by leodum           ###   ########.fr       */
+/*   Updated: 2025/11/28 18:11:13 by leodum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,42 +23,36 @@ char *extract_line_from_buffer(char **buf_ptr)
 	char *result;
 	char *afternewline;
 	int index;
-	
+	char *old_buf;
+
 	if (*buf_ptr == NULL)
 		return (NULL);
-		// ok problem here because if i put the pointer to buf_ptr to afternewline
-		// so when i free buf_ptr, i also free afternewline
-		// need to copy and not just put the pointer
-		// need to think about it
-		// maybe modify ft_strchr directly ?
 	afternewline = ft_strchr(*buf_ptr, '\n');
 	if (afternewline == NULL)
-		return (NULL);
+		return (NULL);	
 	index = afternewline - *buf_ptr + 1;
+	old_buf = *buf_ptr;
 	result = ft_substr(*buf_ptr, 0, index);
-	free (*buf_ptr);
 	if (*(afternewline + 1) == '\0')
 		*buf_ptr = NULL;
 	else
 	*buf_ptr = ft_strdup(afternewline + 1);
+	free (old_buf);
 	return (result);
 }
-// need to work on the length also 
-// gonna be complicated
-// maybe add a function free them all ?
+
 int process_temp_buffer(char *temp, char **result_ptr, char **buf_ptr)
 {
 	char *buf_char;
 	char *old_result;
 	char *newline;
 	int index;
-	
+
 	buf_char = ft_strchr(temp, '\n');
 	if (buf_char != NULL)
 	{
 		index = buf_char - temp +1;
 		old_result = *result_ptr;
-		// maybe add a check if NULL?
 		newline = ft_substr(temp, 0, index);
 		*result_ptr = ft_strjoin(old_result, newline);
 		free (old_result);
@@ -84,56 +78,94 @@ char	*get_next_line(int fd)
 {
 	int char_left;
 	int found;
-	static int check = 0;
 	static char *buf;
 	char *result;
 	char *temp;
+	char *old_result;
 
+	found = 0;
 	result = extract_line_from_buffer(&buf);
+	   if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+        return (NULL);
+		
 	if (result != NULL)
 		return (result);
-
-	result = ft_calloc(BUFFER_SIZE +1, sizeof(char));
+	if (buf != NULL)
+	{
+		result = ft_strdup(buf);
+		free (buf);
+	}
+	else
+		result = ft_calloc(BUFFER_SIZE +1, sizeof(char));
 	temp = ft_calloc(BUFFER_SIZE +1, sizeof(char));
+
 	while (!found)
 	{
 		char_left = read(fd, temp, BUFFER_SIZE);
-		found = process_temp_buffer(temp, &result, &buf);
-		if(found)
-			break ; 
+		if (char_left == 0)
+		{
+			if (buf)
+			{
+				old_result = result;
+				result = ft_strjoin(old_result, buf);
+				free (buf);
+				return (result);
+			}
+			else
+			{
+				free (buf); 
+				return (NULL);
+			}
+		}
+		else
+			found = process_temp_buffer(temp, &result, &buf);	
 	}
-	
+	free (temp);
 	return (result);
 }
 
-int main(void)
-{
-	int fd = open("test.txt", O_RDWR);
-	char *a = get_next_line(fd);
-	char *b = get_next_line(fd);
-	char *c = get_next_line(fd);
-	char *d = get_next_line(fd);
-	char *f = get_next_line(fd);
-	char *g = get_next_line(fd);
-	char *h = get_next_line(fd);
-	char *j = get_next_line(fd);
-	char *k = get_next_line(fd);
-	char *l = get_next_line(fd);
-	char *m = get_next_line(fd);
-	char *n = get_next_line(fd);
-	char *o = get_next_line(fd);
+// int main(void)
+// {
+// 	int fd = open("test.txt", O_RDWR);
 	
-	printf("%s", a);
-	printf("%s", b);
-	printf("%s", c);
-	printf("%s", d);
-	printf("%s", f);
-	printf("%s", g);
-	printf("%s", h);
-	printf("%s", j);
-	printf("%s", k);
-	printf("%s", l);
-	printf("%s", m);
-	printf("%s", n);
-	printf("%s", o);
-}
+// 	char *a = get_next_line(fd);
+// 	char *b = get_next_line(fd);
+// 	char *c = get_next_line(fd);
+// 	char *d = get_next_line(fd);
+// 	char *f = get_next_line(fd);
+// 	char *g = get_next_line(fd);
+// 	char *h = get_next_line(fd);
+// 	char *j = get_next_line(fd);
+// 	char *k = get_next_line(fd);
+// 	char *l = get_next_line(fd);
+// 	char *m = get_next_line(fd);
+// 	char *n = get_next_line(fd);
+// 	char *o = get_next_line(fd);
+	
+// 	printf("%s", a);
+// 	free (a);
+// 	printf("%s", b);
+// 	free (b);
+// 	printf("%s", c);
+// 	free (c);
+// 	printf("%s", d);
+// 	free (d);
+// 	printf("%s", f);
+// 	free (f);
+// 	printf("%s", g);
+// 	free (g);
+// 	printf("%s", h);
+// 	free (h);
+// 	printf("%s", j);
+// 	free (j);
+// 	printf("%s", k);
+// 	free (k);
+// 	printf("%s", l);
+// 	free (l);
+// 	printf("%s", m);
+// 	free (m);
+// 	printf("%s", n);
+// 	free (n);
+// 	printf("%s", o);
+// 	free (o);
+// }

@@ -6,7 +6,7 @@
 /*   By: leodum <leodum@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 12:18:25 by leodum            #+#    #+#             */
-/*   Updated: 2025/11/25 19:53:24 by leodum           ###   ########.fr       */
+/*   Updated: 2025/11/28 16:52:13 by leodum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #define GET_NEXT_LINE_H
 
 #ifndef BUFFER_SIZE 
-# define BUFFER_SIZE 15
+# define BUFFER_SIZE 10
 # endif
 
 # include <fcntl.h>
