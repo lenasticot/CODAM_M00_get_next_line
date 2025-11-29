@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 12:14:47 by leodum            #+#    #+#             */
-/*   Updated: 2025/11/29 18:28:37 by marvin           ###   ########.fr       */
+/*   Updated: 2025/11/29 20:25:27 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,15 @@
 #include <stdint.h>
 #include "get_next_line.h"
 
+
+void join_and_free(char **result_ptr, char *to_join)
+{
+	char *old;
+
+	old = *result_ptr;
+	*result_ptr = ft_strjoin(old, to_join);
+	free (old);
+}
 
 char *extract_line_from_buffer(char **buf_ptr)
 {
@@ -66,12 +75,7 @@ int process_temp_buffer(char *temp, char **result_ptr, char **buf_ptr)
    			 *buf_ptr = ft_strdup(buf_char + 1);
 		return (1);
 	}
-	else
-	{ 
-		old_result = *result_ptr;
-		*result_ptr = ft_strjoin(old_result, temp);
-		free (old_result);
-	}
+	join_and_free(result_ptr, temp);
 	return (0);
 }
 
@@ -79,12 +83,10 @@ char *read_and_build_line(int fd, char *result, char **buf, int found)
 {
 	char *temp;
 	int char_left;
-	char *old_result;
 	
 	temp = malloc(BUFFER_SIZE + 1);
 	if (!temp)
 		return (NULL);
-	found = 0;
 	while (!found)
 	{ 
 	char_left = read(fd, temp, BUFFER_SIZE);
@@ -93,9 +95,7 @@ char *read_and_build_line(int fd, char *result, char **buf, int found)
 		{
 			if (*buf)
 			{
-				old_result = result;
-				result = ft_strjoin(old_result, *buf);
-				free (old_result);
+				join_and_free(&result, *buf);
 				free (*buf);
 				*buf = NULL;
 			}
@@ -132,48 +132,48 @@ char	*get_next_line(int fd)
 	return (read_and_build_line(fd, result, &buf, found));
 }
 
-int main(void)
-{
-	int fd = open("test.txt", O_RDWR);
+// int main(void)
+// {
+// 	int fd = open("test.txt", O_RDWR);
 	
-	char *a = get_next_line(fd);
-	char *b = get_next_line(fd);
-	char *c = get_next_line(fd);
-	char *d = get_next_line(fd);
-	char *f = get_next_line(fd);
-	char *g = get_next_line(fd);
-	char *h = get_next_line(fd);
-	char *j = get_next_line(fd);
-	char *k = get_next_line(fd);
-	char *l = get_next_line(fd);
-	char *m = get_next_line(fd);
-	char *n = get_next_line(fd);
-	char *o = get_next_line(fd);
+// 	char *a = get_next_line(fd);
+// 	char *b = get_next_line(fd);
+// 	char *c = get_next_line(fd);
+// 	char *d = get_next_line(fd);
+// 	char *f = get_next_line(fd);
+// 	char *g = get_next_line(fd);
+// 	char *h = get_next_line(fd);
+// 	char *j = get_next_line(fd);
+// 	char *k = get_next_line(fd);
+// 	char *l = get_next_line(fd);
+// 	char *m = get_next_line(fd);
+// 	char *n = get_next_line(fd);
+// 	char *o = get_next_line(fd);
 	
-	printf("%s", a);
-	free (a);
-	printf("%s", b);
-	free (b);
-	printf("%s", c);
-	free (c);
-	printf("%s", d);
-	free (d);
-	printf("%s", f);
-	free (f);
-	printf("%s", g);
-	free (g);
-	printf("%s", h);
-	free (h);
-	printf("%s", j);
-	free (j);
-	printf("%s", k);
-	free (k);
-	printf("%s", l);
-	free (l);
-	printf("%s", m);
-	free (m);
-	printf("%s", n);
-	free (n);
-	printf("%s", o);
-	free (o);
-}
+// 	printf("%s", a);
+// 	free (a);
+// 	printf("%s", b);
+// 	free (b);
+// 	printf("%s", c);
+// 	free (c);
+// 	printf("%s", d);
+// 	free (d);
+// 	printf("%s", f);
+// 	free (f);
+// 	printf("%s", g);
+// 	free (g);
+// 	printf("%s", h);
+// 	free (h);
+// 	printf("%s", j);
+// 	free (j);
+// 	printf("%s", k);
+// 	free (k);
+// 	printf("%s", l);
+// 	free (l);
+// 	printf("%s", m);
+// 	free (m);
+// 	printf("%s", n);
+// 	free (n);
+// 	printf("%s", o);
+// 	free (o);
+// }
