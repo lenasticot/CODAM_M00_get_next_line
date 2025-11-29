@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_utils.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: leodum <leodum@student.42.fr>              +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 12:17:39 by leodum            #+#    #+#             */
-/*   Updated: 2025/11/25 19:40:52 by leodum           ###   ########.fr       */
+/*   Updated: 2025/11/29 17:35:19 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,21 +112,4 @@ char	*ft_strchr(const char *s, int c)
 	return (NULL);
 }
 
-void	*ft_calloc(size_t count, size_t size)
-{
-	unsigned char	*ptr;
-	size_t			i;
-	size_t			len;
-
-	i = 0;
-	if (size != 0 && count > SIZE_MAX / size)
-		return (NULL);
-	len = count * size;
-	ptr = malloc(len);
-	if (ptr == NULL)
-		return (NULL);
-	while (i < len)
-		ptr[i++] = 0;
-	return (ptr);
-}
 

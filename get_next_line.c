@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: leodum <leodum@student.42.fr>              +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 12:14:47 by leodum            #+#    #+#             */
-/*   Updated: 2025/11/28 18:11:13 by leodum           ###   ########.fr       */
+/*   Updated: 2025/11/29 18:28:37 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ int process_temp_buffer(char *temp, char **result_ptr, char **buf_ptr)
 	int index;
 
 	buf_char = ft_strchr(temp, '\n');
-	if (buf_char != NULL)
+	if (buf_char)
 	{
 		index = buf_char - temp +1;
 		old_result = *result_ptr;
@@ -57,10 +57,13 @@ int process_temp_buffer(char *temp, char **result_ptr, char **buf_ptr)
 		*result_ptr = ft_strjoin(old_result, newline);
 		free (old_result);
 		free (newline);
-		if (*(buf_char + 1) == '\0')
+		if (*buf_ptr)  
+		{
+			free(*buf_ptr);
 			*buf_ptr = NULL;
-		else
-			*buf_ptr = ft_strdup(buf_char +1); 
+		}
+		if (*(buf_char + 1) != '\0')
+   			 *buf_ptr = ft_strdup(buf_char + 1);
 		return (1);
 	}
 	else
@@ -72,100 +75,105 @@ int process_temp_buffer(char *temp, char **result_ptr, char **buf_ptr)
 	return (0);
 }
 
-// one remaining problem
-// to check when there is no newline case
-char	*get_next_line(int fd)
+char *read_and_build_line(int fd, char *result, char **buf, int found)
 {
-	int char_left;
-	int found;
-	static char *buf;
-	char *result;
 	char *temp;
+	int char_left;
 	char *old_result;
-
+	
+	temp = malloc(BUFFER_SIZE + 1);
+	if (!temp)
+		return (NULL);
 	found = 0;
-	result = extract_line_from_buffer(&buf);
-	   if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
-        return (NULL);
-		
-	if (result != NULL)
-		return (result);
-	if (buf != NULL)
-	{
-		result = ft_strdup(buf);
-		free (buf);
-	}
-	else
-		result = ft_calloc(BUFFER_SIZE +1, sizeof(char));
-	temp = ft_calloc(BUFFER_SIZE +1, sizeof(char));
-
 	while (!found)
-	{
-		char_left = read(fd, temp, BUFFER_SIZE);
+	{ 
+	char_left = read(fd, temp, BUFFER_SIZE);
+	temp[char_left] = '\0';
 		if (char_left == 0)
 		{
-			if (buf)
+			if (*buf)
 			{
 				old_result = result;
-				result = ft_strjoin(old_result, buf);
-				free (buf);
-				return (result);
+				result = ft_strjoin(old_result, *buf);
+				free (old_result);
+				free (*buf);
+				*buf = NULL;
 			}
-			else
-			{
-				free (buf); 
-				return (NULL);
-			}
+			free(temp);
+			return (result);
 		}
-		else
-			found = process_temp_buffer(temp, &result, &buf);	
+			found = process_temp_buffer(temp, &result, buf);	
 	}
-	free (temp);
+	free(temp);
 	return (result);
 }
 
-// int main(void)
-// {
-// 	int fd = open("test.txt", O_RDWR);
+char	*get_next_line(int fd)
+{
+	static char *buf;
+	int found;
+	char *result;
 	
-// 	char *a = get_next_line(fd);
-// 	char *b = get_next_line(fd);
-// 	char *c = get_next_line(fd);
-// 	char *d = get_next_line(fd);
-// 	char *f = get_next_line(fd);
-// 	char *g = get_next_line(fd);
-// 	char *h = get_next_line(fd);
-// 	char *j = get_next_line(fd);
-// 	char *k = get_next_line(fd);
-// 	char *l = get_next_line(fd);
-// 	char *m = get_next_line(fd);
-// 	char *n = get_next_line(fd);
-// 	char *o = get_next_line(fd);
+	found = 0;
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+        return (NULL);
+	result = extract_line_from_buffer(&buf);
+	if (result != NULL)
+		return (result);
+	if (buf != NULL)
+		result = ft_strdup(buf);
+	else
+	{
+		result = malloc(BUFFER_SIZE +1);
+		if (!result)
+			return (NULL);
+		result[0] = '\0';
+	}
+	return (read_and_build_line(fd, result, &buf, found));
+}
+
+int main(void)
+{
+	int fd = open("test.txt", O_RDWR);
 	
-// 	printf("%s", a);
-// 	free (a);
-// 	printf("%s", b);
-// 	free (b);
-// 	printf("%s", c);
-// 	free (c);
-// 	printf("%s", d);
-// 	free (d);
-// 	printf("%s", f);
-// 	free (f);
-// 	printf("%s", g);
-// 	free (g);
-// 	printf("%s", h);
-// 	free (h);
-// 	printf("%s", j);
-// 	free (j);
-// 	printf("%s", k);
-// 	free (k);
-// 	printf("%s", l);
-// 	free (l);
-// 	printf("%s", m);
-// 	free (m);
-// 	printf("%s", n);
-// 	free (n);
-// 	printf("%s", o);
-// 	free (o);
-// }
+	char *a = get_next_line(fd);
+	char *b = get_next_line(fd);
+	char *c = get_next_line(fd);
+	char *d = get_next_line(fd);
+	char *f = get_next_line(fd);
+	char *g = get_next_line(fd);
+	char *h = get_next_line(fd);
+	char *j = get_next_line(fd);
+	char *k = get_next_line(fd);
+	char *l = get_next_line(fd);
+	char *m = get_next_line(fd);
+	char *n = get_next_line(fd);
+	char *o = get_next_line(fd);
+	
+	printf("%s", a);
+	free (a);
+	printf("%s", b);
+	free (b);
+	printf("%s", c);
+	free (c);
+	printf("%s", d);
+	free (d);
+	printf("%s", f);
+	free (f);
+	printf("%s", g);
+	free (g);
+	printf("%s", h);
+	free (h);
+	printf("%s", j);
+	free (j);
+	printf("%s", k);
+	free (k);
+	printf("%s", l);
+	free (l);
+	printf("%s", m);
+	free (m);
+	printf("%s", n);
+	free (n);
+	printf("%s", o);
+	free (o);
+}
