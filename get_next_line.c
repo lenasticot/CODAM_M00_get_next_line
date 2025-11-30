@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: leodum <leodum@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 12:14:47 by leodum            #+#    #+#             */
-/*   Updated: 2025/11/29 20:25:27 by marvin           ###   ########.fr       */
+/*   Updated: 2025/11/30 16:01:32 by leodum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,119 +17,121 @@
 #include <stdint.h>
 #include "get_next_line.h"
 
-
-void join_and_free(char **result_ptr, char *to_join)
+void	*ft_calloc(size_t count, size_t size)
 {
-	char *old;
+	unsigned char	*ptr;
+	size_t			i;
+	size_t			len;
 
-	old = *result_ptr;
-	*result_ptr = ft_strjoin(old, to_join);
-	free (old);
-}
-
-char *extract_line_from_buffer(char **buf_ptr)
-{
-	char *result;
-	char *afternewline;
-	int index;
-	char *old_buf;
-
-	if (*buf_ptr == NULL)
+	i = 0;
+	if (size != 0 && count > SIZE_MAX / size)
 		return (NULL);
-	afternewline = ft_strchr(*buf_ptr, '\n');
-	if (afternewline == NULL)
-		return (NULL);	
-	index = afternewline - *buf_ptr + 1;
-	old_buf = *buf_ptr;
-	result = ft_substr(*buf_ptr, 0, index);
-	if (*(afternewline + 1) == '\0')
-		*buf_ptr = NULL;
-	else
-	*buf_ptr = ft_strdup(afternewline + 1);
-	free (old_buf);
-	return (result);
+	len = count * size;
+	ptr = malloc(len);
+	if (ptr == NULL)
+		return (NULL);
+	while (i < len)
+		ptr[i++] = 0;
+	return (ptr);
 }
 
-int process_temp_buffer(char *temp, char **result_ptr, char **buf_ptr)
+char *join_and_free(char *buf, char *temp)
 {
-	char *buf_char;
-	char *old_result;
-	char *newline;
-	int index;
-
-	buf_char = ft_strchr(temp, '\n');
-	if (buf_char)
-	{
-		index = buf_char - temp +1;
-		old_result = *result_ptr;
-		newline = ft_substr(temp, 0, index);
-		*result_ptr = ft_strjoin(old_result, newline);
-		free (old_result);
-		free (newline);
-		if (*buf_ptr)  
-		{
-			free(*buf_ptr);
-			*buf_ptr = NULL;
-		}
-		if (*(buf_char + 1) != '\0')
-   			 *buf_ptr = ft_strdup(buf_char + 1);
-		return (1);
-	}
-	join_and_free(result_ptr, temp);
-	return (0);
+	char *other_temp;
+	
+	other_temp = ft_strjoin(buf, temp);
+	free(buf);
+	return (other_temp);
 }
 
-char *read_and_build_line(int fd, char *result, char **buf, int found)
+char *next_line(char *buf)
+{
+	int i;
+	int j;
+	char *nline;
+
+	i = 0;
+	j = 0;
+
+	while (buf[i] != '\0' && buf[i] != '\n')
+		i++;
+	if(!buf[i])
+	{
+		free (buf);
+		return (NULL);
+	}
+	nline = ft_calloc((ft_strlen(buf) - i + 1), sizeof(char));
+	i++;
+	while (buf[i] != '\0')
+		nline[j++] = buf[i++];
+	free (buf);
+	return (nline);
+}
+
+char *extract_line(char *buf)
+{
+	char *newline;
+	int i;
+
+	i = 0;
+	if(!buf[i])
+		return (NULL);
+	while(buf[i] != '\0' && buf[i] != '\n')
+		i++;
+	newline = ft_calloc(i + 2, sizeof(char));
+	i = 0;
+	while (buf[i] != '\0' && buf[i] != '\n')
+	{ 
+		newline[i] = buf[i];
+		i++;
+	}
+	if (buf[i] && buf[i] == '\n')
+		newline[i++] = '\n';
+	return (newline);
+}
+
+char *reading_file(int fd, char *buf)
 {
 	char *temp;
 	int char_left;
-	
-	temp = malloc(BUFFER_SIZE + 1);
-	if (!temp)
-		return (NULL);
-	while (!found)
-	{ 
-	char_left = read(fd, temp, BUFFER_SIZE);
-	temp[char_left] = '\0';
-		if (char_left == 0)
+
+	if(!buf)
+		buf = ft_calloc(1, 1);
+	temp = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	char_left = 1;
+	while(char_left > 0)
+	{
+		char_left = read(fd, temp, BUFFER_SIZE);
+		if(char_left == -1)
 		{
-			if (*buf)
-			{
-				join_and_free(&result, *buf);
-				free (*buf);
-				*buf = NULL;
-			}
-			free(temp);
-			return (result);
+			free (temp);			
+			return (NULL);
 		}
-			found = process_temp_buffer(temp, &result, buf);	
-	}
-	free(temp);
-	return (result);
+		temp[char_left] = 0;
+		buf = join_and_free(buf, temp);
+		if (ft_strchr(temp, '\n'))
+			break ;
+	}	
+	free (temp);
+	return (buf);
 }
 
 char	*get_next_line(int fd)
 {
 	static char *buf;
-	int found;
 	char *result;
-	
-	found = 0;
+
 	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
         return (NULL);
-	result = extract_line_from_buffer(&buf);
-	if (result != NULL)
-		return (result);
-	if (buf != NULL)
-		result = ft_strdup(buf);
-	else
-	{
-		result = malloc(BUFFER_SIZE +1);
-		if (!result)
-			return (NULL);
-		result[0] = '\0';
+	buf = reading_file(fd, buf);
+	if (!buf)
+	{ 
+		buf = NULL;
+		return (NULL);
 	}
-	return (read_and_build_line(fd, result, &buf, found));
+	result = extract_line(buf);
+	buf = next_line(buf);
+	return (result);
 }
 
 // int main(void)
@@ -150,30 +152,17 @@ char	*get_next_line(int fd)
 // 	char *n = get_next_line(fd);
 // 	char *o = get_next_line(fd);
 	
-// 	printf("%s", a);
-// 	free (a);
+// 	printf("%s", a);;
 // 	printf("%s", b);
-// 	free (b);
 // 	printf("%s", c);
-// 	free (c);
 // 	printf("%s", d);
-// 	free (d);
 // 	printf("%s", f);
-// 	free (f);
 // 	printf("%s", g);
-// 	free (g);
 // 	printf("%s", h);
-// 	free (h);
 // 	printf("%s", j);
-// 	free (j);
 // 	printf("%s", k);
-// 	free (k);
 // 	printf("%s", l);
-// 	free (l);
 // 	printf("%s", m);
-// 	free (m);
 // 	printf("%s", n);
-// 	free (n);
 // 	printf("%s", o);
-// 	free (o);
 // }
