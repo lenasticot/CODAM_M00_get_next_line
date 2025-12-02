@@ -6,7 +6,7 @@
 /*   By: leodum <leodum@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 12:14:47 by leodum            #+#    #+#             */
-/*   Updated: 2025/12/01 16:36:45 by leodum           ###   ########.fr       */
+/*   Updated: 2025/12/02 14:40:11 by leodum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,7 @@ char	*reading_file(int fd, char *buf)
 		if (char_left == -1)
 		{
 			free (temp);
+			free (buf);
 			return (NULL);
 		}
 		temp[char_left] = 0;
@@ -109,7 +110,6 @@ char	*get_next_line(int fd)
 	buf = reading_file(fd, buf);
 	if (!buf)
 	{
-		free(buf);
 		buf = NULL;
 		return (NULL);
 	}
