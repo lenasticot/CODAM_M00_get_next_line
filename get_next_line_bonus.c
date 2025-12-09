@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: leodum <leodum@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 12:14:47 by leodum            #+#    #+#             */
-/*   Updated: 2025/12/09 17:18:26 by leodum           ###   ########.fr       */
+/*   Updated: 2025/12/09 17:16:59 by leodum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 char	*join_and_free(char *buf, char *temp)
 {
@@ -57,7 +57,7 @@ char	*extract_line(char *buf)
 	while (buf[i] != '\0' && buf[i] != '\n')
 		i++;
 	newline = ft_calloc(i + 2, sizeof(char));
-	if (!newline)
+	if(!newline)
 		return (NULL);
 	i = 0;
 	while (buf[i] != '\0' && buf[i] != '\n')
@@ -85,36 +85,37 @@ char	*reading_file(int fd, char *buf)
 	{
 		char_left = read(fd, temp, BUFFER_SIZE);
 		if (char_left < 0)
-			return (free(temp), free(buf), NULL);
+			return (free (temp), free (buf), NULL);
 		temp[char_left] = 0;
 		buf = join_and_free(buf, temp);
 		if (ft_strchr(temp, '\n'))
 			break ;
 	}
-	return (free (temp), buf);
+	free (temp);
+	return (buf);
 }
 
 char	*get_next_line(int fd)
 {
-	static char	*buf;
+	static char	*buf[1024];
 	char		*result;
 
-	if (fd < 0 || BUFFER_SIZE <= 0)
-	{
-		if (buf)
+	if (fd < 0 || BUFFER_SIZE <= 0 || fd > 1024)
+	{ 
+		if (fd >= 0 && fd < 1024 && buf[fd])
 		{
-			free(buf);
-			buf = NULL;
+			free(buf[fd]);
+			buf[fd] = NULL;
 		}
 		return (NULL);
 	}
-	buf = reading_file(fd, buf);
-	if (!buf)
+	buf[fd] = reading_file(fd, buf[fd]);
+	if (!buf[fd])
 	{
-		buf = NULL;
+		buf[fd] = NULL;
 		return (NULL);
 	}
-	result = extract_line(buf);
-	buf = next_line(buf);
+	result = extract_line(buf[fd]);
+	buf[fd] = next_line(buf[fd]);
 	return (result);
 }
